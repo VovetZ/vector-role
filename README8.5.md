@@ -91,18 +91,57 @@ ubuntu                     : ok=2    changed=0    unreachable=0    failed=0    s
 docker run --privileged=True -v /home/vk/vector-role:/opt/vector-role -w /opt/vector-role -it aragast/netology:latest /bin/bash
 ```
 4. Внутри контейнера выполните команду `tox`, посмотрите на вывод.
-```bash
-```
 5. Создайте облегчённый сценарий для `molecule` с драйвером `molecule_podman`. Проверьте его на исполнимость.
-```bash
 
+#### Ответ
+Скопировал `molecule/default` в `molecule/mini`. Далее отредактировал
+`mini/molecule.yaml`
+```yaml
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+platforms:
+  - name: centos8
+    image: docker.io/pycontribs/centos:8
+    pre_build_image: true
+  - name: ubuntu
+    image: docker.io/pycontribs/ubuntu:latest
+    pre_build_image: true
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+    - create
+    - converge
+    - idempotence
+    - destroy
 ```
+
 7. Пропишите правильную команду в `tox.ini` для того чтобы запускался облегчённый сценарий.
 `tox.ini'
 ```
+[tox]
+minversion = 1.8
+basepython = python3.6
+envlist = py{37,39}-ansible{210,30}
+skipsdist = true
+
+[testenv]
+passenv = *
+deps =
+    -r tox-requirements.txt
+    ansible210: ansible<3.0
+    ansible30: ansible<3.1
+commands =
+    {posargs:molecule test -s mini --destroy always}
 ```
 9. Запустите команду `tox`. Убедитесь, что всё отработало успешно.
 ```bash
+
 ```
 11. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
 
