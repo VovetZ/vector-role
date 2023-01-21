@@ -140,11 +140,27 @@ commands =
     {posargs:molecule test -s mini --destroy always}
 ```
 9. Запустите команду `tox`. Убедитесь, что всё отработало успешно.
-```bash
-[root@a4eeb4b2edcd vector-role]# tox
-
-```
 11. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
+```bash
+root@vkvm:/home/vk/vector-role# git add .
+root@vkvm:/home/vk/vector-role# git commit -m 'Molecule & Tox'
+[main 8b686eb] Molecule & Tox
+root@vkvm:/home/vk/vector-role# git push
+Enumerating objects: 42, done.
+Counting objects: 100% (42/42), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (31/31), done.
+Writing objects: 100% (35/35), 6.08 KiB | 444.00 KiB/s, done.
+Total 35 (delta 13), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (13/13), completed with 2 local objects.
+To https://github.com/VovetZ/vector-role/
+   5abd726..8b686eb  main -> main
+root@vkvm:/home/vk/vector-role# git tag 2.0.0
+root@vkvm:/home/vk/vector-role# git push --tags
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/VovetZ/vector-role/
+ * [new tag]         2.0.0 -> 2.0.0
+```
 
 После выполнения у вас должно получится два сценария molecule и один tox.ini файл в репозитории. Ссылка на репозиторий являются ответами на домашнее задание. Не забудьте указать в ответе теги решений Tox и Molecule заданий.
 
