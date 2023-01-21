@@ -1,10 +1,36 @@
 ---
-- name: Get vector distrib
+- name: fixing repo for CentOS 8
+  become: true
+  ansible.builtin.copy:
+    src: yum.repos.d
+    dest: /etc
+  when: 
+    - ansible_facts.distribution == "CentOS"
+    - ansible_facts.distribution_major_version == "8"
+
+- name: Get vector distrib (deb)
   ansible.builtin.get_url:
     url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_amd64.deb"
     dest: "./vector-{{ vector_version }}.dpkg"
-- name: Install vector packages
+  when: ansible_facts.os_family == "Debian"
+
+- name: Get vector distrib (rpm)
+  ansible.builtin.get_url:
+    url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-1.x86_64.rpm"
+    dest: "./vector-{{ vector_version }}.rpm"
+  when: ansible_facts.os_family == "RedHat"
+
+- name: Install vector packages (deb)
   become: true
   ansible.builtin.apt:
     deb: ./vector-{{ vector_version }}.dpkg
+  when: ansible_facts.os_family == "Debian"
+  notify: start vector service
+
+- name: Install vector packages (rpm)
+  become: true
+  ansible.builtin.yum:
+    name: "./vector-{{ vector_version }}.rpm"
+    disable_gpg_check: true
+  when: ansible_facts.os_family == "RedHat"
   notify: start vector service

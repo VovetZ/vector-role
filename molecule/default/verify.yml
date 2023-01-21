@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+  - name: verify vector config
+    become: true
+    copy:
+      src: vector.toml
+      dest: /etc/vector/vector.toml
+  - name: verify vector is started
+    become: true
+    ansible.builtin.service:
+      name: vector
+      state: started
+    when: ansible_facts.virtualization_type != "docker"
