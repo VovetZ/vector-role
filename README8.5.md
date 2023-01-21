@@ -12,9 +12,75 @@
 
 1. Запустите  `molecule test -s centos7` внутри корневой директории clickhouse-role, посмотрите на вывод команды.
 2. Перейдите в каталог с ролью vector-role и создайте сценарий тестирования по умолчанию при помощи `molecule init scenario --driver-name docker`.
-3. Добавьте несколько разных дистрибутивов (centos:8, ubuntu:latest) для инстансов и протестируйте роль, исправьте найденные ошибки, если они есть.
-4. Добавьте несколько assert'ов в verify.yml файл для  проверки работоспособности vector-role (проверка, что конфиг валидный, проверка успешности запуска, etc). Запустите тестирование роли повторно и проверьте, что оно прошло успешно.
-5. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
+```bash
+root@vkvm:/home/vk/vector-role# molecule init scenario --driver-name docker
+INFO     Initializing new scenario default...
+INFO     Initialized scenario in /home/vk/vector-role/molecule/default successfully.
+```
+4. Добавьте несколько разных дистрибутивов (centos:8, ubuntu:latest) для инстансов и протестируйте роль, исправьте найденные ошибки, если они есть.
+
+#### Ответ
+
+`default/molecule.yml` 
+```yaml
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  ansible-lint .
+  yamllint .
+platforms:
+  - name: centos8
+    image: docker.io/pycontribs/centos:8
+    pre_build_image: true
+  - name: ubuntu
+    image: docker.io/pycontribs/ubuntu:latest
+    pre_build_image: true
+provisioner:
+  name: ansible
+  log: true
+verifier:
+  name: ansible
+`
+6. Добавьте несколько assert'ов в verify.yml файл для  проверки работоспособности vector-role (проверка, что конфиг валидный, проверка успешности запуска, etc). Запустите тестирование роли повторно и проверьте, что оно прошло успешно.
+
+```yaml
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+  - name: verify vector config
+    become: true
+    copy:
+      src: vector.toml
+      dest: /etc/vector/vector.toml
+  - name: verify vector is started
+    become: true
+    ansible.builtin.service:
+      name: vector
+      state: started
+    when: ansible_facts.virtualization_type != "docker"
+```
+
+```bash
+...........................
+TASK [verify vector config] ****************************************************
+ok: [ubuntu]
+ok: [centos8]
+
+TASK [verify vector is started] ************************************************
+skipping: [centos8]
+skipping: [ubuntu]
+
+PLAY RECAP *********************************************************************
+centos8                    : ok=2    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+ubuntu                     : ok=2    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+............................
+```
+7. Добавьте новый тег на коммит с рабочим сценарием в соответствии с семантическим версионированием.
 
 ### Tox
 
