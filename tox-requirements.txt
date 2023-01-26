@@ -1,4 +1,5 @@
 selinux
+ansible
 ansible-lint==5.1.3
 yamllint==1.26.3
 lxml
